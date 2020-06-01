@@ -18,8 +18,8 @@ use std::error::Error;
 
 use std::any::Any;
 
-/// Portable capability providers must respond to this operation with a messagepack-serialized
-/// `CapabilityDescriptor` value, whereas native providers implement a method via the provider trait
+/// All capability providers must respond to this operation, which will be requested by
+/// the host (the `system` actor)
 pub const OP_GET_CAPABILITY_DESCRIPTOR: &str = "GetCapabilityDescriptor";
 
 /// The dispatcher is used by a native capability provider to send commands to an actor module, expecting
@@ -178,8 +178,6 @@ pub trait CapabilityProvider: Any + Send + Sync {
     /// This function will be called on the provider when the host runtime is ready and has configured a dispatcher. This function is only ever
     /// called _once_ for a capability provider, regardless of the number of actors being managed in the host
     fn configure_dispatch(&self, dispatcher: Box<dyn Dispatcher>) -> Result<(), Box<dyn Error>>;
-    /// Obtains a descriptor that describes the capability provider and the operations it supports
-    fn get_descriptor(&self) -> Result<CapabilityDescriptor, Box<dyn Error>>;
     /// Invoked when an actor has requested that a provider perform a given operation
     fn handle_call(&self, actor: &str, op: &str, msg: &[u8]) -> Result<Vec<u8>, Box<dyn Error>>;
 }
