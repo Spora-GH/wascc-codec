@@ -52,16 +52,19 @@ impl CapabilityDescriptor {
     }
 }
 
+/// A fluent syntax builder for creating a capability descriptor
 #[derive(Default)]
 pub struct CapabilityDescriptorBuilder {
     descriptor: CapabilityDescriptor,
 }
 
 impl CapabilityDescriptorBuilder {
+    /// Creates a new capability descriptor builder
     fn new() -> CapabilityDescriptorBuilder {
         CapabilityDescriptorBuilder::default()
     }
 
+    /// Sets the capability ID (e.g. `wascc:messaging`) of the provider
     pub fn id(self, id: &str) -> Self {
         CapabilityDescriptorBuilder {
             descriptor: CapabilityDescriptor {
@@ -71,6 +74,7 @@ impl CapabilityDescriptorBuilder {
         }
     }
 
+    /// Sets the name of the capability provider.
     pub fn name(self, name: &str) -> Self {
         CapabilityDescriptorBuilder {
             descriptor: CapabilityDescriptor {
@@ -80,6 +84,7 @@ impl CapabilityDescriptorBuilder {
         }
     }
 
+    /// Sets a longer, documentation-friendly description of the provider
     pub fn long_description(self, desc: &str) -> Self {
         CapabilityDescriptorBuilder {
             descriptor: CapabilityDescriptor {
@@ -89,6 +94,7 @@ impl CapabilityDescriptorBuilder {
         }
     }
 
+    /// Sets the version string (semver by convention) of the provider
     pub fn version(self, ver: &str) -> Self {
         CapabilityDescriptorBuilder {
             descriptor: CapabilityDescriptor {
@@ -98,6 +104,7 @@ impl CapabilityDescriptorBuilder {
         }
     }
 
+    /// Sets the monotonically increasing, numeric revision number of a provider. Used when comparing provider versions
     pub fn revision(self, rev: u32) -> Self {
         CapabilityDescriptorBuilder {
             descriptor: CapabilityDescriptor {
@@ -107,6 +114,7 @@ impl CapabilityDescriptorBuilder {
         }
     }
 
+    /// Adds an operation descriptor to the provider descriptor.
     pub fn with_operation(self, name: &str, direction: OperationDirection, doctext: &str) -> Self {
         let mut newops = self.descriptor.supported_operations;
         newops.push(OperationDescriptor::new(name, direction, doctext));
@@ -118,6 +126,7 @@ impl CapabilityDescriptorBuilder {
         }
     }
 
+    /// Produces a new capability descriptor from the builder's configuration
     pub fn build(self) -> CapabilityDescriptor {
         self.descriptor
     }
@@ -136,6 +145,7 @@ pub struct OperationDescriptor {
 }
 
 impl OperationDescriptor {
+    /// Creates a new operation descriptor
     pub fn new(name: &str, direction: OperationDirection, doctext: &str) -> OperationDescriptor {
         OperationDescriptor {
             name: name.to_string(),
@@ -157,7 +167,7 @@ pub enum OperationDirection {
 
 /// The NullDispatcher is as its name implies--a dispatcher that does nothing. This is convenient for
 /// initializing a capability provider with a null dispatcher, and then swapping it for a real dispatcher
-/// when the host runtime provides one tethered with the appropriate channels
+/// when the host runtime provides one configured with the appropriate channels
 #[derive(Default)]
 pub struct NullDispatcher {}
 
@@ -173,7 +183,8 @@ impl Dispatcher for NullDispatcher {
     }
 }
 
-/// Every capability provider must implement this trait
+/// Every native capability provider must implement this trait. Both portable and native capability providers
+/// must respond to the following operations: `OP_BIND_ACTOR`, `OP_REMOVE_ACTOR`, `OP_GET_CAPABILITY_DESCRIPTOR`
 pub trait CapabilityProvider: Any + Send + Sync {
     /// This function will be called on the provider when the host runtime is ready and has configured a dispatcher. This function is only ever
     /// called _once_ for a capability provider, regardless of the number of actors being managed in the host
