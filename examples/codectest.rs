@@ -46,7 +46,7 @@ struct ValidateCommand {
     path: String,
 }
 
-fn main() -> Result<(), Box<dyn ::std::error::Error>> {
+fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let args = Cli::from_args();
     let cmd = args.command;
 
@@ -59,14 +59,14 @@ fn main() -> Result<(), Box<dyn ::std::error::Error>> {
     Ok(())
 }
 
-fn handle_command(cmd: CliCommand) -> Result<(), Box<dyn ::std::error::Error>> {
+fn handle_command(cmd: CliCommand) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     match cmd {
         CliCommand::Validate(valcmd) => validate_file(&valcmd),
         CliCommand::Generate(gencmd) => generate_file(&gencmd),
     }
 }
 
-fn generate_file(cmd: &GenerateCommand) -> Result<(), Box<dyn ::std::error::Error>> {
+fn generate_file(cmd: &GenerateCommand) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let output = json!({
         "version" : codec::VERSION,
         "httpserver": generate_httpserver_sample(),
@@ -83,7 +83,7 @@ fn generate_file(cmd: &GenerateCommand) -> Result<(), Box<dyn ::std::error::Erro
     Ok(())
 }
 
-fn validate_file(cmd: &ValidateCommand) -> Result<(), Box<dyn ::std::error::Error>> {
+fn validate_file(cmd: &ValidateCommand) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let mut f = File::open(&cmd.path)?;
     let mut buffer = Vec::new();
 
@@ -178,7 +178,7 @@ fn generate_eventstreams_sample() -> serde_json::Value {
 fn assert<'de, T: Deserialize<'de> + PartialEq + std::fmt::Debug>(
     value: &serde_json::Value,
     expected: T,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
     let encoded = value.to_string().replace("\"", "");
     let bytes = base64::decode(&encoded)?;
 

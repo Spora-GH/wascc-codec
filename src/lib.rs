@@ -35,7 +35,9 @@ use std::io::Cursor;
 /// The standard function for serializing codec structs into a format that can be
 /// used for message exchange between actor and host. Use of any other function to
 /// serialize could result in breaking incompatibilities.
-pub fn serialize<T>(item: T) -> ::std::result::Result<Vec<u8>, Box<dyn ::std::error::Error>>
+pub fn serialize<T>(
+    item: T,
+) -> ::std::result::Result<Vec<u8>, Box<dyn std::error::Error + Send + Sync>>
 where
     T: Serialize,
 {
@@ -49,7 +51,7 @@ where
 /// deserialize could result in breaking incompatibilities.
 pub fn deserialize<'de, T: Deserialize<'de>>(
     buf: &[u8],
-) -> ::std::result::Result<T, Box<dyn ::std::error::Error>> {
+) -> ::std::result::Result<T, Box<dyn std::error::Error + Send + Sync>> {
     let mut de = Deserializer::new(Cursor::new(buf));
     match Deserialize::deserialize(&mut de) {
         Ok(t) => Ok(t),
