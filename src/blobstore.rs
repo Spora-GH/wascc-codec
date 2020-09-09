@@ -40,6 +40,9 @@ pub struct FileChunk {
     pub total_bytes: u64,
     /// The number of bytes within any given chunk. Note that the last chunk in a file stream may be less than `chunk_size`
     pub chunk_size: u64,
+    /// The context value supplied by the consumer during initial stream request
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<String>,
     /// The raw bytes contained in this chunk
     #[serde(with = "serde_bytes")]
     #[serde(default)]
@@ -55,6 +58,7 @@ impl Sample for FileChunk {
             total_bytes: 53400,
             chunk_size: 1024,
             chunk_bytes: vec![1, 2, 3, 4, 5],
+            context: None,
         }
     }
 }
@@ -114,6 +118,9 @@ pub struct StreamRequest {
     pub container: String,
     /// The preferred size of chunks to be delivered. Consumers must not assume this is the size of the chunks they will get
     pub chunk_size: u64,
+    /// A user-defined context value that will be placed on all sent file chunks. Useful for doing correlation of multiple independent transfers
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<String>,
 }
 
 /// Metadata about an in-progress file transfer
@@ -130,4 +137,7 @@ pub struct Transfer {
     pub total_size: u64,
     /// Total number of chunks being transferred
     pub total_chunks: u64,
+    /// The context supplied by the original transfer request
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub context: Option<String>,
 }

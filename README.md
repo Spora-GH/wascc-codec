@@ -5,7 +5,7 @@
 
 # waSCC Codec
 
-The _WebAssembly Secure Capabilities Connector_ (waSCC) codec library contains a set of types and other primitives that are common to the host runtime, capability providers, and actor modules that are created for use with the [wascc](https://wasc.dev) host runtime, which is in turn built on top of [WebAssembly Procedure Call (waPC)](https://github.com/wapc) primitives.
+The _WebAssembly Secure Capabilities Connector_ (waSCC) **codec** library contains a set of types and other primitives that are common to the host runtime, first-party capability providers, and actor modules that are created for use with the [wascc](https://wasc.dev) host runtime, which is in turn built on top of [WebAssembly Procedure Call (waPC)](https://github.com/wapc) primitives.
 
 These types are serializable and de-serializable into a binary format using _[message pack](https://msgpack.org)_. This format consumes a bit more space on the wire than protocol buffers, but imposes less boilerplate burden on developers and produces significantly less latency during serialization/de-serialization.
 
