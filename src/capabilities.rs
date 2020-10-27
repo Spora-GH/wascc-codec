@@ -1,17 +1,3 @@
-// Copyright 2015-2020 Capital One Services, LLC
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 //! # Common types used for managing native capability providers
 
 use std::error::Error;
@@ -195,7 +181,7 @@ impl Dispatcher for NullDispatcher {
 
 /// Every native capability provider must implement this trait. Both portable and native capability providers
 /// must respond to the following operations: `OP_BIND_ACTOR`, `OP_REMOVE_ACTOR`, `OP_GET_CAPABILITY_DESCRIPTOR`
-pub trait CapabilityProvider: Any + Send + Sync {
+pub trait CapabilityProvider: CloneProvider + Send + Sync {
     /// This function will be called on the provider when the host runtime is ready and has configured a dispatcher. This function is only ever
     /// called _once_ for a capability provider, regardless of the number of actors being managed in the host
     fn configure_dispatch(
@@ -209,6 +195,29 @@ pub trait CapabilityProvider: Any + Send + Sync {
         op: &str,
         msg: &[u8],
     ) -> Result<Vec<u8>, Box<dyn Error + Send + Sync>>;
+    /// This function is called to let the capability provider know that it is being removed
+    /// from the host runtime. This gives the provider an opportunity to clean up any
+    /// resources and stop any running threads
+    fn stop(&self);
+}
+
+pub trait CloneProvider {
+    fn clone_provider(&self) -> Box<dyn CapabilityProvider>;
+}
+
+impl<T> CloneProvider for T
+where
+    T: CapabilityProvider + Clone + 'static,
+{
+    fn clone_provider(&self) -> Box<dyn CapabilityProvider> {
+        Box::new(self.clone())
+    }
+}
+
+impl Clone for Box<dyn CapabilityProvider> {
+    fn clone(&self) -> Self {
+        self.clone_provider()
+    }
 }
 
 /// Wraps a constructor inside an FFI function to allow the `CapabilityProvider` trait implementation
